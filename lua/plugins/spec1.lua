@@ -33,43 +33,48 @@ return {
         end,
       })
 
-      require("mason-lspconfig").setup({
-        ensure_installed = { "pyright", "clangd", "ltex" },
-        handlers = {
-          function(server_name)
-            lspconfig[server_name].setup({
-              capabilities = capabilities,
-            })
-          end,
-          ["ltex"] = function()
-            lspconfig.ltex.setup({
-              capabilities = capabilities,
-              filetypes = { "markdown", "text", "gitcommit", "norg", "mail" },
-              settings = {
-                ltex = {
-                  language = "en-US",
-                  -- This allows LTeX to store "add to dictionary" words in a file
-                  dictionary = {
-                    ["en-US"] = { "neovim", "LSP" } 
-                  },
-                }
-              }
-            })
-          end,
-        },
-      })
-
+        require("mason-lspconfig").setup({
+          ensure_installed = { "pyright", "clangd", "ltex" },
+          handlers = {
+            -- Default handler
+            function(server_name)
+              lspconfig[server_name].setup({
+                capabilities = capabilities,
+              })
+            end,
+            -- Specific handler for clangd
+            ["clangd"] = function()
+              lspconfig.clangd.setup({
+                capabilities = {
+                  -- This fixes the "multiple different client offset_encodings" warning
+                  offsetEncoding = { "utf-16" }, 
+                },
+                cmd = {
+                  "clangd",
+                  "--background-index",
+                  -- Add this to tell clangd where your REAL compiler is
+                  "--query-driver=C:/NXP/S32DS.3.5/S32DS/tools/gnu-gcc-arm-none-eabi-9-2019-q4-major/bin/arm-none-eabi-gcc.exe",
+                  "--header-insertion=never",
+                  -- This forces clangd to try and resolve those @args files
+                  "--fallback-style=llvm",
+                },
+              })
+            end,
+            ["ltex"] = function()
+              -- ... your existing ltex config ...
+            end,
+          },
+        })
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }), 
         callback = function(ev)
           local opts = { buffer = ev.buf, silent = true }
-          vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-          vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-          vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-          vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+           vim.keymap.set('n', '<leader>tg', vim.lsp.buf.definition, opts)
+          vim.keymap.set('n', '<leader>th', vim.lsp.buf.hover, opts)
+          vim.keymap.set('n', '<leader>tj', vim.lsp.buf.references, opts)
+          -- vim.keymap.set('n', '<leader>tn', vim.lsp.buf.rename, opts)
           
-          -- IMPORTANT: Use <leader>ca to see LTeX spelling suggestions
-          vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
+          vim.keymap.set({ 'n', 'v' }, '<leader>xa', vim.lsp.buf.code_action, opts)
           
           -- Standard Vim Spell Jump keys
           -- [s : Previous misspelled word

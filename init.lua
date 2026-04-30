@@ -1,5 +1,6 @@
 
 
+
 --[[
 local reg = require("plugins.reg-edit")
 local registers = reg.read_registers();
@@ -102,30 +103,6 @@ vim.api.nvim_set_keymap(
 
 
 
--- Define the configuration for pyright
-vim.lsp.config['pyright'] = {
-  cmd = { "pyright-langserver", "--stdio" },
-  filetypes = { "python" },
-  root_markers = {
-    "pyproject.toml",
-    "setup.py",
-    "requirements.txt",
-    ".git",
-  },
-  settings = {
-    python = {
-      analysis = {
-        autoSearchPaths = true,
-        useLibraryCodeForTypes = true,
-        reportUnusedExpression = true,
-      },
-    },
-  },
-}
-
--- Enable the config
-vim.lsp.enable('pyright')
-
 -- Create a namespace for your semi-permanent marks
 local vesc_ns = vim.api.nvim_create_namespace('vesc_highlights')
 
@@ -154,7 +131,6 @@ vim.keymap.set('n', '<leader>N', ':lua Clear_Highlights()<CR>', { silent = true 
 
 
 
-vim.keymap.set('n', '<leader>tg', vim.lsp.buf.definition, {})
 
  -- Show diagnostic popup on hover
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = "Show line diagnostics" })       
