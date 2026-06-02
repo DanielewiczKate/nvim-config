@@ -1,5 +1,13 @@
 
 return {
+  -- Example with lazy.nvim
+  {
+    'https://codeberg.org/esensar/nvim-dev-container',
+    dependencies = 'nvim-treesitter/nvim-treesitter',
+    config = function() 
+      require("devcontainer").setup{}
+    end
+  },
   -- 1. Treesitter Context
   {
     "nvim-treesitter/nvim-treesitter-context",
@@ -12,7 +20,7 @@ return {
     end
   },
 
-  -- 2. LSP Config & Mason (Includes LTeX for Spell/Grammar)
+-- 2. LSP Config & Mason (Includes LTeX for Spell/Grammar)
   {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -22,6 +30,12 @@ return {
     config = function()
       require("mason").setup()
       local capabilities = vim.lsp.protocol.make_client_capabilities()
+      -- Markdown Oxide requires specific capabilities for tags and links
+      capabilities.workspace = {
+        didChangeWatchedFiles = {
+          dynamicRegistration = true,
+        },
+      }
       local lspconfig = require("lspconfig")
 
       -- Enable Native Vim Spelling for specific files
@@ -33,59 +47,60 @@ return {
         end,
       })
 
-        require("mason-lspconfig").setup({
-          ensure_installed = { "pyright", "clangd", "ltex" },
-          handlers = {
-            -- Default handler
-            function(server_name)
-              lspconfig[server_name].setup({
-                capabilities = capabilities,
-              })
-            end,
-            -- Specific handler for clangd
-            ["clangd"] = function()
-              lspconfig.clangd.setup({
-                capabilities = {
-                  -- This fixes the "multiple different client offset_encodings" warning
-                  offsetEncoding = { "utf-16" }, 
-                },
-                cmd = {
-                  "clangd",
-                  "--background-index",
-                  -- Add this to tell clangd where your REAL compiler is
-                  "--query-driver=C:/NXP/S32DS.3.5/S32DS/tools/gnu-gcc-arm-none-eabi-9-2019-q4-major/bin/arm-none-eabi-gcc.exe",
-                  "--header-insertion=never",
-                  -- This forces clangd to try and resolve those @args files
-                  "--fallback-style=llvm",
-                },
-              })
-            end,
-            ["ltex"] = function()
-              -- ... your existing ltex config ...
-            end,
-          },
-        })
+      require("mason-lspconfig").setup({
+        -- Added markdown_oxide here
+        ensure_installed = { "pyright", "clangd", "ltex", "markdown_oxide" },
+        handlers = {
+          -- Default handler
+          function(server_name)
+            lspconfig[server_name].setup({
+              capabilities = capabilities,
+            })
+          end,
+
+          -- Markdown Oxide specific setup
+          ["markdown_oxide"] = function()
+            lspconfig.markdown_oxide.setup({
+              capabilities = capabilities,
+              -- On_attach isn't strictly required here since you use a global LspAttach autocmd below
+            })
+          end,
+
+          -- Specific handler for clangd
+          ["clangd"] = function()
+            lspconfig.clangd.setup({
+              capabilities = {
+                offsetEncoding = { "utf-16" }, 
+              },
+              cmd = {
+                "clangd",
+                "--background-index",
+                "--query-driver=C:/NXP/S32DS.3.5/S32DS/tools/gnu-gcc-arm-none-eabi-9-2019-q4-major/bin/arm-none-eabi-gcc.exe",
+                "--header-insertion=never",
+                "--fallback-style=llvm",
+              },
+            })
+          end,
+
+          ["ltex"] = function()
+            -- ... your existing ltex config ...
+          end,
+        },
+      })
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }), 
         callback = function(ev)
           local opts = { buffer = ev.buf, silent = true }
-           vim.keymap.set('n', '<leader>tg', vim.lsp.buf.definition, opts)
+          vim.keymap.set('n', '<leader>tg', vim.lsp.buf.definition, opts)
           vim.keymap.set('n', '<leader>th', vim.lsp.buf.hover, opts)
           vim.keymap.set('n', '<leader>tj', vim.lsp.buf.references, opts)
-          -- vim.keymap.set('n', '<leader>tn', vim.lsp.buf.rename, opts)
           
           vim.keymap.set({ 'n', 'v' }, '<leader>xa', vim.lsp.buf.code_action, opts)
-          
-          -- Standard Vim Spell Jump keys
-          -- [s : Previous misspelled word
-          -- ]s : Next misspelled word
-          -- z= : Suggest corrections for word under cursor
-          -- zg : Add word to dictionary
         end,
       })
     end,
   },
-
   -- 4. Neo-tree
   {
     "nvim-neo-tree/neo-tree.nvim",
@@ -139,17 +154,15 @@ return {
   { "tpope/vim-repeat" },
   -- Abolish is great for fixing common typos automatically
   { "tpope/vim-abolish", event = "BufReadPost" },
-
   -- 8. Leap & Flit
   {
-    "ggandor/leap.nvim",
+    url = "https://codeberg.org/andyg/leap.nvim",
     config = function()
       require('leap').add_default_mappings()
     end,
   },
   {
     "ggandor/flit.nvim",
-    dependencies = { "ggandor/leap.nvim" },
     config = function()
       require('flit').setup({
         keys = { f = 'f', F = 'F', t = 't', T = 'T' },
@@ -158,5 +171,14 @@ return {
         opts = { smart_case = true }
       })
     end,
+  },
+  {
+    "startup-nvim/startup.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim", "nvim-telescope/telescope-file-browser.nvim" },
+    config = function()
+      local startup = require("startup")
+      local settings = require("config.startup_nvim")
+      startup.setup(settings)    
+    end
   },
 }
