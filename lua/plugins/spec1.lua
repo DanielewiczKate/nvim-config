@@ -1,4 +1,3 @@
-
 return {
   -- Example with lazy.nvim
   {
@@ -145,7 +144,7 @@ return {
 
   -- 7. Utilities & Movement
   { "folke/which-key.nvim", lazy = true },
-  { "nvim-neorg/neorg", ft = "norg", opts = { load = { ["core.defaults"] = {} } } },
+  -- { "nvim-neorg/neorg", ft = "norg", opts = { load = { ["core.defaults"] = {} } } },
   { "dstein64/vim-startuptime", cmd = "StartupTime" },
   { "hrsh7th/nvim-cmp", event = "InsertEnter", dependencies = { "hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer" } },
   { "stevearc/dressing.nvim", event = "VeryLazy" },
@@ -154,22 +153,11 @@ return {
   { "tpope/vim-repeat" },
   -- Abolish is great for fixing common typos automatically
   { "tpope/vim-abolish", event = "BufReadPost" },
-  -- 8. Leap & Flit
+  -- 8. Leap
   {
     url = "https://codeberg.org/andyg/leap.nvim",
     config = function()
       require('leap').add_default_mappings()
-    end,
-  },
-  {
-    "ggandor/flit.nvim",
-    config = function()
-      require('flit').setup({
-        keys = { f = 'f', F = 'F', t = 't', T = 'T' },
-        labeled_modes = "v", 
-        multiline = true,
-        opts = { smart_case = true }
-      })
     end,
   },
   {

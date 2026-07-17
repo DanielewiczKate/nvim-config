@@ -21,6 +21,8 @@ vim.o.number = true
 vim.opt.smartcase = true
 require("config.lazy")
 require("abbrs")
+vim.keymap.set({ 'n', 'x', 'o' }, 's', '<Plug>(leap)')
+vim.keymap.set('n',               'S', '<Plug>(leap-from-window)')
 
 -- Move cursor with Alt + hjkl
 -- Using 'g' prefix ensures movement follows wrapped lines (visual lines)
