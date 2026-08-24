@@ -14,6 +14,7 @@ vim.opt.grepformat = "%f:%l:%c:%m"
 
 vim.wo.relativenumber = true
 vim.o.tabstop = 4
+vim.o.shiftwidth = 4
 vim.o.expandtab = true
 vim.o.wrap = true
 vim.o.ignorecase = true
@@ -197,4 +198,8 @@ vim.keymap.set("v", "<leader>af", function()
 end, { noremap = true, silent = true, desc = "Find visual selection" })
 
 
-
+-- For Neovim Lua configuration
+vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+  pattern = "*",
+  command = [[%s/\r//e]],
+})
