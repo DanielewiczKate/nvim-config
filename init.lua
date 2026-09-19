@@ -11,7 +11,7 @@ reg.print_registers(registers)
 -- Disable any custom tagfunc filtering
 -- vim.o.tagfunc = ""
 vim.opt.grepformat = "%f:%l:%c:%m"
-
+vim.o.colorcolumn = "80"
 vim.wo.relativenumber = true
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
