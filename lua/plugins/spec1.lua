@@ -137,10 +137,15 @@ return {
         },
       })
 
+      local servers = { "pyright", "clangd", "ltex", "markdown_oxide", "verible" }
+      local on_nixos = vim.fn.filereadable("/etc/NIXOS") == 1
+
       require("mason-lspconfig").setup({
-        -- Added markdown_oxide and verible (Verilog/SystemVerilog) here
-        ensure_installed = { "pyright", "clangd", "ltex", "markdown_oxide", "verible" },
+        -- On NixOS the servers come from the system (NixOS repo: modules/packages.nix)
+        ensure_installed = on_nixos and {} or servers,
       })
+      -- automatic_enable only covers Mason-installed servers, so enable them explicitly
+      vim.lsp.enable(servers)
 
       -- Format Verilog/SystemVerilog on save via verible-verilog-ls
       -- (backed by verible-verilog-format).
